@@ -85,25 +85,25 @@ class HandledIsolate<T> {
   /// Isolates need to be disposed of using `kill` when done using them.
   ///
   /// Returns spawned [HandledIsolate] instance.
-  HandledIsolate({
-    required String name,
-    required void Function(Map<String, dynamic>) function,
-    void Function()? onInitialized,
-    bool paused = false,
-    bool? errorsAreFatal,
-    SendPort? onExit,
-    SendPort? onError,
-    String? debugName,
-  })  : _messenger = HandledIsolateMessenger(onInitialized: onInitialized),
+  HandledIsolate(
+      {required String name,
+      required void Function(Map<String, dynamic>) function,
+      void Function()? onInitialized,
+      bool paused = false,
+      bool? errorsAreFatal,
+      SendPort? onExit,
+      SendPort? onError,
+      String? debugName,
+      Map<String, Object>? customData})
+      : _messenger = HandledIsolateMessenger(onInitialized: onInitialized),
         _name = name {
-    _init(
-      function,
-      paused: paused,
-      errorsAreFatal: errorsAreFatal,
-      onExit: onExit,
-      onError: onError,
-      debugName: debugName,
-    );
+    _init(function,
+        paused: paused,
+        errorsAreFatal: errorsAreFatal,
+        onExit: onExit,
+        onError: onError,
+        debugName: debugName,
+        customData: customData);
   }
 
   /// Establishes communication channels between this instance and `context`.
@@ -155,19 +155,23 @@ class HandledIsolate<T> {
   /// isolate was started as [paused], it may already have terminated before
   /// those methods can complete.
   void _init(
-    /// Entry point of the [Isolate]. Must be a top-level or static function.
-    /// Passed to constructor. May not be null.
-    Function(Map<String, dynamic>) function, {
-    bool paused = false,
-    bool? errorsAreFatal,
-    SendPort? onExit,
-    SendPort? onError,
-    String? debugName,
-  }) async {
+
+      /// Entry point of the [Isolate]. Must be a top-level or static function.
+      /// Passed to constructor. May not be null.
+      Function(Map<String, dynamic>) function,
+      {bool paused = false,
+      bool? errorsAreFatal,
+      SendPort? onExit,
+      SendPort? onError,
+      String? debugName,
+      Map<String, Object>? customData}) async {
     final message = {
       'messenger': messenger.outPort,
       'name': name,
     };
+    if (customData != null) {
+      message.addAll(customData);
+    }
     _isolate = await FlutterIsolate.spawn(function, message);
   }
 

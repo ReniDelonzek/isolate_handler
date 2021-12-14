@@ -161,22 +161,27 @@ class IsolateHandler {
   /// Throws if `name` is not unique.
   ///
   /// Returns spawned [HandledIsolate] instance.
-  HandledIsolate spawn<T>(
-    void Function(Map<String, dynamic>) function, {
-    String? name,
-    void Function(T message)? onReceive,
-    void Function()? onInitialized,
-    bool paused = false,
-    bool? errorsAreFatal,
-    SendPort? onExit,
-    SendPort? onError,
-    String? debugName,
-  }) {
+  HandledIsolate spawn<T>(void Function(Map<String, dynamic>) function,
+      {String? name,
+      void Function(T message)? onReceive,
+      void Function()? onInitialized,
+      bool paused = false,
+      bool? errorsAreFatal,
+      SendPort? onExit,
+      SendPort? onError,
+      String? debugName,
+      Map<String, Object>? customData}) {
     assert(name == null || !isolates.containsKey(name));
 
     name ??= '__anonymous_${_uid++}';
-    isolates[name] = HandledIsolate<T>(name: name, function: function, onInitialized: onInitialized);
-    isolates[name]!.messenger.listen((dynamic message) => onReceive?.call(message));
+    isolates[name] = HandledIsolate<T>(
+        name: name,
+        function: function,
+        onInitialized: onInitialized,
+        customData: customData);
+    isolates[name]!
+        .messenger
+        .listen((dynamic message) => onReceive?.call(message));
     return isolates[name]!;
   }
 
